@@ -5,9 +5,19 @@ db = Database()
 
 class TrainingSessions(db.Entity):
     date = Required(datetime, sql_default='CURRENT_TIMESTAMP')
-    
+    chamber_count = Required(int)
+    swap_delay = Required(int)
+
+    chambers = Set('Chambers')
     sandboxes = Set('UserSandboxes')
     score_table = Set('ScoreTable')
+
+
+class Chambers(db.Entity):
+    dummy = Required('Dummies')
+    reaction_to_guess = Required('ReactionTypes')
+
+    session = Required(TrainingSessions)
 
 
 class Dummies(db.Entity):

@@ -1,14 +1,26 @@
-from flask import Flask
+from flask import Flask, render_template, session, request, redirect, url_for
 from models import *
 from pony.orm import db_session
 import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def main():
-    check_new_dummies()
-    return 'Hi'
+    if request.method == 'POST':
+        session.pop('user', None)
+        session['user'] = request.form['username']
+        if not Users.exists(name=session['user']):
+            Users(name=session['user'])
+        return redirect(url_for('test'))
+    return render_template('login.html')
+
+
+@app.route('/test')
+def test():
+    return render_template('test.html')
+
 
 @db_session
 def check_new_dummies():

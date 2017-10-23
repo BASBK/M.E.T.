@@ -1,0 +1,16 @@
+#img {
+    height: 500px;
+    width: 300px;
+    background-color: red;
+    float: left;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#controls {
+    height: 500px;
+    width: 300px;
+    background-color: blue;
+    float: left;
+}

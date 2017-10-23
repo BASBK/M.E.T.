@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div id="img"></div>
+        <div id="controls">
+
+        </div>
+    </body>
+    <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        async function swap(){
+            document.getElementById("img").style.backgroundImage = "url({{ url_for('static', filename='1.png') }})";
+            await sleep((Math.random() * (2-5) + 5) * 1000);
+            document.getElementById("img").style.backgroundImage = "url({{ url_for('static', filename='2.png') }})";
+            await sleep(100);
+            document.getElementById("img").style.backgroundImage = "url({{ url_for('static', filename='1.png') }})";
+        }
+        swap();
+    </script>
+</html>
