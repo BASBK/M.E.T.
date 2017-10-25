@@ -7,6 +7,8 @@ class TrainingSessions(db.Entity):
     date = Required(datetime, sql_default='CURRENT_TIMESTAMP')
     chamber_count = Required(int)
     swap_delay = Required(int)
+    swap_start = Required(int)
+    swap_end = Required(int)
 
     chambers = Set('Chambers')
     sandboxes = Set('UserSandboxes')
@@ -14,6 +16,7 @@ class TrainingSessions(db.Entity):
 
 
 class Chambers(db.Entity):
+    step = Required(int)
     dummy = Required('Dummies')
     reaction_to_guess = Required('ReactionTypes')
 
@@ -26,18 +29,23 @@ class Dummies(db.Entity):
     
     reactions = Set('Reactions')
     sandboxes = Set('UserSandboxes')
+    chambers = Set(Chambers)
 
 class ReactionTypes(db.Entity):
-    type = Required(str)
+    type_name = Required(str)
 
     reactions = Set('Reactions')
     sandboxes = Set('UserSandboxes')
+    chambers = Set(Chambers)
 
 
 class Reactions(db.Entity):
     dummy = Required(Dummies)
     file_name = Required(str)
     reaction_type = Required(ReactionTypes)
+
+    def get_path(this):
+        return '/static/dummies/' + this.dummy.name + '/' + this.file_name
 
 
 class Users(db.Entity):

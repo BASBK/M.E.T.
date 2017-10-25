@@ -1,24 +1,71 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     </head>
     <body>
         <div id="img"></div>
         <div id="controls">
-
+            <p><span id="cur_step"></span> / <span id="steps"></span></p>
+            <p>
+            {% for react in reactions %}
+                <input type="radio" name="reactions" value="{{ react.id }}"> {{ react.type_name }} <br>
+            {% endfor %}
+            </p>
+            <input type="button" onclick="next()" value="Далее">
         </div>
     </body>
-    <script>
+    <script type=text/javascript>
+        var cur_step;
+        var steps;
+        var img1;
+        var img2;
+        var delay;
+        var start_time;
+        var end_time;
+
+        function first_data(){
+            $.ajax({ url: "/first_data", success: function(data) {
+                cur_step = 1;
+                steps = data.steps;
+                img1 = data.img1;
+                img2 = data.img2;
+                delay = data.delay;
+                start_time = data.start_time;
+                end_time = data.end_time;
+                $("#cur_step").text(cur_step);
+                $("#steps").text(steps);
+                swap(img1, img2);
+                }
+            });
+            
+        }
+        function next_imgs(react){
+            $.ajax({ url: "/next_data", 
+                data: ('cur_step=' + cur_step + '&guessed_react=' + react),
+                success: function(data) {
+                img1 = data.img1;
+                img2 = data.img2;
+                swap(img1, img2);
+                }
+            });
+        }
+        function next() {
+            selected_react = document.querySelector('input[name="reactions"]:checked').value;
+            next_imgs(selected_react);
+            cur_step++;
+            $("#cur_step").text(cur_step);
+        }
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
-        async function swap(){
-            document.getElementById("img").style.backgroundImage = "url({{ url_for('static', filename='1.png') }})";
-            await sleep((Math.random() * (2-5) + 5) * 1000);
-            document.getElementById("img").style.backgroundImage = "url({{ url_for('static', filename='2.png') }})";
-            await sleep(100);
-            document.getElementById("img").style.backgroundImage = "url({{ url_for('static', filename='1.png') }})";
+        async function swap(img1, img2){
+            $("#img").css("backgroundImage", "url(" + img1 + ")");
+            await sleep((Math.random() * (start_time - end_time) + end_time) * 1000);
+            $("#img").css("backgroundImage", "url(" + img2 + ")");
+            await sleep(delay);
+            $("#img").css("backgroundImage", "url(" + img1 + ")");
         }
-        swap();
+        first_data();
     </script>
 </html>
