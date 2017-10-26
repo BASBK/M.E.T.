@@ -54,7 +54,11 @@
             selected_react = document.querySelector('input[name="reactions"]:checked').value;
             next_imgs(selected_react);
             cur_step++;
-            $("#cur_step").text(cur_step);
+            if (cur_step > steps) {
+                window.location.href = '/finish';
+            } else {
+                $("#cur_step").text(cur_step);
+            }
         }
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));

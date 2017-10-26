@@ -21,6 +21,7 @@ class Chambers(db.Entity):
     reaction_to_guess = Required('ReactionTypes')
 
     session = Required(TrainingSessions)
+    sandboxes = Set('UserSandboxes')
 
 
 class Dummies(db.Entity):
@@ -28,7 +29,6 @@ class Dummies(db.Entity):
     assets_path = Required(str)
     
     reactions = Set('Reactions')
-    sandboxes = Set('UserSandboxes')
     chambers = Set(Chambers)
 
 class ReactionTypes(db.Entity):
@@ -57,7 +57,7 @@ class Users(db.Entity):
 
 class UserSandboxes(db.Entity):
     user = Required(Users)
-    dummy = Required(Dummies)
+    chamber = Required(Chambers)
     guessed_reaction = Required(ReactionTypes)
     session = Required(TrainingSessions)
 

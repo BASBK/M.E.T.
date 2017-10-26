@@ -7,6 +7,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 @app.route('/', methods=['GET', 'POST'])
+@db_session
 def main():
     if request.method == 'POST':
         session.pop('user', None)
@@ -46,29 +47,63 @@ def test():
 @db_session
 def first_data():
     cur_session = TrainingSessions.select().order_by(desc(TrainingSessions.id)).first()
-    first_chamber = Chambers.get(session=cur_session, step=1)
-    img1 = first_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == 0).get().get_path()
-    img2 = first_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == first_chamber.reaction_to_guess.id).get().get_path()
-    return jsonify(steps=cur_session.chamber_count,
-                   delay=cur_session.swap_delay,
-                   img1=img1,
-                   img2=img2,
-                   start_time=cur_session.swap_start,
-                   end_time=cur_session.swap_end)
+    if 'user' in session:
+        usr = Users.get(name=session['user'])
+        prev_tries = usr.sandboxes.select(lambda s: s.session == cur_session)
+        if prev_tries is not None:
+            prev_tries.delete(bulk=True)
+        first_chamber = Chambers.get(session=cur_session, step=1)
+        img1 = first_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == 0).get().get_path()
+        img2 = first_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == first_chamber.reaction_to_guess.id).get().get_path()
+        return jsonify(steps=cur_session.chamber_count,
+                       delay=cur_session.swap_delay,
+                       img1=img1,
+                       img2=img2,
+                       start_time=cur_session.swap_start,
+                       end_time=cur_session.swap_end)
+    return 'Session not found', 404
 
 
 @app.route('/next_data')
 @db_session
 def next_data():
     cur_session = TrainingSessions.select().order_by(desc(TrainingSessions.id)).first()
-    next_chamber = Chambers.get(session=cur_session, step=int(request.args['cur_step']) + 1)
-    print(next_chamber.id)
-    img1 = next_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == 0).get().get_path()
-    img2 = next_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == next_chamber.reaction_to_guess.id).get().get_path()
-    print(img2)
-    return jsonify(img1=img1,
-                   img2=img2)
+    if 'user' in session:
+        usr = Users.get(name=session['user'])
+        cur_chamber = Chambers.get(session=cur_session, step=int(request.args['cur_step']))
+        usr.sandboxes.create(chamber=cur_chamber, guessed_reaction=ReactionTypes[int(request.args['guessed_react'])], session=cur_session)
+        if int(request.args['cur_step']) < cur_session.chamber_count:
+            next_chamber = Chambers.get(session=cur_session, step=int(request.args['cur_step']) + 1)
+            img1 = next_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == 0).get().get_path()
+            img2 = next_chamber.dummy.reactions.select(lambda r: r.reaction_type.id == next_chamber.reaction_to_guess.id).get().get_path()
+            return jsonify(img1=img1,
+                           img2=img2)
+        elif int(request.args['cur_step']) > cur_session.chamber_count:
+            return 'Bad Request', 400
+    return 'Session not found', 404
+    
 
+
+@app.route('/finish')
+@db_session
+def finish():
+    if 'user' in session:
+        user = Users.get(name=session['user'])
+        cur_session = TrainingSessions.select().order_by(desc(TrainingSessions.id)).first()
+        score = calculate_score(user, cur_session)
+        return str(score) + '/' + str(cur_session.chamber_count)
+    return 'Session not found', 404
+
+
+def calculate_score(user, cur_session):
+    score_table = ScoreTable.get(user=user, session=cur_session)
+    if score_table is None:
+        score_table = ScoreTable(user=user, session=cur_session)
+    score_table.score = 0
+    for line in user.sandboxes.select():
+        if line.guessed_reaction.id == line.chamber.reaction_to_guess.id:
+            score_table.score += 1
+    return score_table.score
 
 @db_session
 def check_new_dummies():
@@ -81,5 +116,5 @@ def check_new_dummies():
                 dummy.reactions.create(file_name=r.name, reaction_type=ReactionTypes[int(r.name[0])])
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
     
