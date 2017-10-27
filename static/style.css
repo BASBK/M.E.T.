@@ -13,3 +13,17 @@
     width: 300px;
     float: left;
 }
+
+#sessions {
+    float: left;
+    padding-right: 100px;
+}
+
+#new_session_form {
+    float: left;
+}
+
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}

@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div id="sessions">
+            <h3>Список сессий</h3>
+            <ol>
+                {% for session in sessions %}
+                    <a href="/session/{{ session.id }}"><li>{{ session.name }}</li></a>
+                {% endfor %}
+            </ol>
+        </div>
+        <div id="new_session_form">
+            <h3>Создать новую сессию</h3>
+            <form method="POST" name="new_sess">
+                Имя сессии:<br>
+                <input type="text" name="sess_name" required><br>
+                Кол-во тестовых "комнат":<br>
+                <input type="text" name="sess_chamber_count" maxlength="2" size="4" required><br>
+                Задержка при смене изображения(мс):<br>
+                <input type="text" name="sess_swap_delay" maxlength="3" size="3" required><br>
+                Интервал случайного срабатывания подмены(сек): от <input type="text" name="sess_swap_start" maxlength="2" size="3" required> до
+                <input type="text" name="sess_swap_end" maxlength="2" size="3" required><br>
+                <input type="submit", value="Создать сессию">
+            </form>
+        </div>
+    </body>
+</html>

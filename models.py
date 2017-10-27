@@ -4,6 +4,7 @@ from datetime import datetime
 db = Database()
 
 class TrainingSessions(db.Entity):
+    name = Required(str)
     date = Required(datetime, sql_default='CURRENT_TIMESTAMP')
     chamber_count = Required(int)
     swap_delay = Required(int)

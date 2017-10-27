@@ -1,0 +1,33 @@
+<html>
+    <head>
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <h2>{{ data.name }}</h2>
+        <table>
+            <tr>
+                <th rowspan="2">Имя</th>
+                {% for i in range(data.chamber_count) %}
+                    <th colspan="2">{{ i+1 }}</th>
+                {% endfor %}
+                <th rowspan="2">Итого</th>
+            </tr>
+            <tr>
+                {% for i in range(data.chamber_count) %}
+                    <td>О</td>
+                    <td>П</td>
+                {% endfor %}
+            </tr>
+            {% for row in data.score_table %}
+                <tr>
+                    <td> {{ row.user.name }} </td>
+                    {% for s in row.user.sandboxes %}
+                        <td> {{ s.guessed_reaction.id }} </td>
+                        <td> {{ s.chamber.reaction_to_guess.id }} </td>
+                    {% endfor %}
+                    <td> {{ row.score }} </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>

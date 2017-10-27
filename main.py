@@ -30,7 +30,7 @@ def init():
     ReactionTypes(type_name='Радость')
     ReactionTypes(type_name='Печаль')
     check_new_dummies()
-    ts = TrainingSessions(chamber_count=5, swap_delay=200,
+    ts = TrainingSessions(name='Test', chamber_count=5, swap_delay=200,
                      swap_start=2, swap_end=5)
     for i in range(ts.chamber_count):
         ts.chambers.create(step=i+1, dummy=Dummies[1], reaction_to_guess=random.randint(1,6))
@@ -40,7 +40,7 @@ def init():
 @app.route('/test')
 @db_session
 def test():
-    return render_template('test.html', reactions=ReactionTypes.select())
+    return render_template('test.html', reactions=ReactionTypes.select(lambda r: r.id > 0))
 
 
 @app.route('/first_data')
@@ -82,6 +82,25 @@ def next_data():
             return 'Bad Request', 400
     return 'Session not found', 404
     
+
+@app.route('/admin', methods=['GET', 'POST'])
+@db_session
+def admin():
+    if request.method == "POST":
+        TrainingSessions(name=request.form['sess_name'],
+                         chamber_count=request.form['sess_chamber_count'],
+                         swap_delay=request.form['sess_swap_delay'],
+                         swap_start=request.form['sess_swap_start'],
+                         swap_end=request.form['sess_swap_end'])
+    return render_template('admin.html', 
+                           sessions=TrainingSessions.select().order_by(desc(TrainingSessions.id)))
+
+
+@app.route('/session/<id>')
+@db_session
+def get_stats(id):
+    cur_session = TrainingSessions[id]
+    return render_template('stats.html', data=cur_session)
 
 
 @app.route('/finish')
