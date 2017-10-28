@@ -2,6 +2,7 @@
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
     </head>
     <body>
         <div id="img"></div>
@@ -9,11 +10,18 @@
             <p><span id="cur_step"></span> / <span id="steps"></span></p>
             <p>
             {% for react in reactions %}
-                <input type="radio" name="reactions" value="{{ react.id }}"> {{ react.type_name }} <br>
+            <div class="pretty p-default p-round">
+                <input type="radio" name="reactions" value="{{ react.id }}">
+                <div class="state">
+                    <label> {{ react.type_name }} </label>
+                </div>
+            </div><br><br>
             {% endfor %}
             </p>
             <input type="button" onclick="next()" value="Далее">
         </div>
+        <div id="preload-1"></div>
+        <div id="preload-2"></div>
     </body>
     <script type=text/javascript>
         var cur_step;
@@ -35,6 +43,10 @@
                 end_time = data.end_time;
                 $("#cur_step").text(cur_step);
                 $("#steps").text(steps);
+                img_1 = new Image();
+                img_2 = new Image();
+                img_1.src = img1;
+                img_2.src = img2;
                 swap(img1, img2);
                 }
             });
@@ -46,6 +58,10 @@
                 success: function(data) {
                 img1 = data.img1;
                 img2 = data.img2;
+                img_1 = new Image();
+                img_2 = new Image();
+                img_1.src = img1;
+                img_2.src = img2;
                 swap(img1, img2);
                 }
             });

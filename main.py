@@ -30,10 +30,6 @@ def init():
     ReactionTypes(type_name='Радость')
     ReactionTypes(type_name='Печаль')
     check_new_dummies()
-    ts = TrainingSessions(name='Test', chamber_count=5, swap_delay=200,
-                     swap_start=2, swap_end=5)
-    for i in range(ts.chamber_count):
-        ts.chambers.create(step=i+1, dummy=Dummies[1], reaction_to_guess=random.randint(1,6))
     return 'Done'
 
 
@@ -87,13 +83,27 @@ def next_data():
 @db_session
 def admin():
     if request.method == "POST":
-        TrainingSessions(name=request.form['sess_name'],
+        ts = TrainingSessions(name=request.form['sess_name'],
                          chamber_count=request.form['sess_chamber_count'],
                          swap_delay=request.form['sess_swap_delay'],
                          swap_start=request.form['sess_swap_start'],
                          swap_end=request.form['sess_swap_end'])
+        gen_chambers(ts)
     return render_template('admin.html', 
                            sessions=TrainingSessions.select().order_by(desc(TrainingSessions.id)))
+
+
+def gen_chambers(ts):
+    t = 0
+    while t < (ts.chamber_count):
+        chamber = Chambers(step=t+1, 
+                           dummy=Dummies.select_random(1)[0],
+                           reaction_to_guess=random.randint(1,6)) 
+        if not ts.chambers.select(lambda c: c.dummy == chamber.dummy and c.reaction_to_guess == chamber.reaction_to_guess).exists():
+            ts.chambers.add(chamber)
+            t+=1
+        else:
+            chamber.delete()
 
 
 @app.route('/session/<id>')

@@ -21,7 +21,7 @@ class Chambers(db.Entity):
     dummy = Required('Dummies')
     reaction_to_guess = Required('ReactionTypes')
 
-    session = Required(TrainingSessions)
+    session = Optional(TrainingSessions)
     sandboxes = Set('UserSandboxes')
 
 
@@ -53,7 +53,7 @@ class Users(db.Entity):
     name = Required(str)
     
     sandboxes = Set('UserSandboxes')
-    score_table = Optional('ScoreTable')
+    score_table = Set('ScoreTable')
 
 
 class UserSandboxes(db.Entity):
