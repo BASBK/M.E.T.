@@ -33,7 +33,7 @@ class Dummies(db.Entity):
     chambers = Set(Chambers)
 
 class ReactionTypes(db.Entity):
-    type_name = Required(str)
+    type_name = Required(str, unique=True)
 
     reactions = Set('Reactions')
     sandboxes = Set('UserSandboxes')

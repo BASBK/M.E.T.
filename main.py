@@ -1,7 +1,9 @@
 from flask import Flask, render_template, session, request, redirect, url_for, jsonify
 from models import *
 from pony.orm import db_session, desc, commit
+from pony.orm.core import TransactionIntegrityError, IntegrityError
 import os, random
+from PIL import Image
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -36,7 +38,9 @@ def init():
 @app.route('/test')
 @db_session
 def test():
-    return render_template('test.html', reactions=ReactionTypes.select(lambda r: r.id > 0))
+    if 'user' in session:
+        return render_template('test.html', reactions=ReactionTypes.select(lambda r: r.id > 0))
+    return redirect(url_for('main'))
 
 
 @app.route('/first_data')
@@ -120,7 +124,7 @@ def finish():
         user = Users.get(name=session['user'])
         cur_session = TrainingSessions.select().order_by(desc(TrainingSessions.id)).first()
         score = calculate_score(user, cur_session)
-        return str(score) + '/' + str(cur_session.chamber_count)
+        return render_template('finish.html')
     return 'Session not found', 404
 
 
@@ -143,6 +147,19 @@ def check_new_dummies():
             reactions = os.scandir(d.path)
             for r in reactions:
                 dummy.reactions.create(file_name=r.name, reaction_type=ReactionTypes[int(r.name[0])])
+
+
+@app.route('/admin/resize')
+@db_session
+def resize_imgs():
+    size = 900, 600
+    for r in Reactions.select():
+        img = Image.open(r.dummy.assets_path + '\\' + r.file_name)
+        img.thumbnail(size)
+        img.save(r.dummy.assets_path + '\\' + r.file_name)
+        img.close()
+    return 'Done....or not'
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)

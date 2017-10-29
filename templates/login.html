@@ -1,11 +1,14 @@
 <html>
     <head>
-
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     </head>
     <body>
-        <form method="POST" name="login_form">
-            <input type="text" name="username" placeholder="Your name here!">
-            <input type="submit" value="Log in!"> 
-        </form>
+        <h2 id="login_heading">Добро пожаловать!</h2>
+        <div id="login_form_wrapper">
+            <form method="POST" name="login_form">
+                <input type="text" name="username" placeholder="Ваше имя!" required><br>
+                <input type="submit" value="Начать!"> 
+            </form>
+        </div>
     </body>
 </html>
