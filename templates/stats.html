@@ -21,7 +21,7 @@
             {% for row in data.score_table %}
                 <tr>
                     <td> {{ row.user.name }} </td>
-                    {% for s in row.user.sandboxes %}
+                    {% for s in sandboxes[row.user.name] %}
                         <td> {{ s.guessed_reaction.id }} </td>
                         <td> {{ s.chamber.reaction_to_guess.id }} </td>
                     {% endfor %}

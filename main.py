@@ -114,7 +114,12 @@ def gen_chambers(ts):
 @db_session
 def get_stats(id):
     cur_session = TrainingSessions[id]
-    return render_template('stats.html', data=cur_session)
+    sandboxes = {}
+    for row in cur_session.score_table:
+        sandboxes[row.user.name] = []
+        for s in row.user.sandboxes.select().order_by(lambda snd: snd.chamber.step):
+            sandboxes[row.user.name].append(s)   
+    return render_template('stats.html', data=cur_session, sandboxes=sandboxes)
 
 
 @app.route('/finish')
