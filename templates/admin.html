@@ -1,6 +1,7 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     </head>
     <body>
         <div id="admin_section_wrapper">
@@ -26,7 +27,16 @@
                     <input type="text" name="sess_swap_end" maxlength="2" size="3" required><br>
                     <input type="submit", value="Создать сессию">
                 </form>
+                <input type="button" onclick="load_imgs()" value="Синхронизировать базу лиц">
             </div>
         </div>
+        <script>
+            function load_imgs() {
+                $.ajax({ url: "/admin/load_imgs", success: function() {
+                        alert('Синхронизировано...или нет...');
+                    }
+                });
+            }
+        </script>
     </body>
 </html>

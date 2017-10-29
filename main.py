@@ -31,7 +31,7 @@ def init():
     ReactionTypes(type_name='Отвращение')
     ReactionTypes(type_name='Радость')
     ReactionTypes(type_name='Печаль')
-    check_new_dummies()
+    load_new_dummies()
     return 'Done'
 
 
@@ -143,15 +143,23 @@ def calculate_score(user, cur_session):
             score_table.score += 1
     return score_table.score
 
+
+@app.route('/admin/load_imgs')
 @db_session
-def check_new_dummies():
+def load_new_dummies():
+    size = 900, 600
     dummies = os.scandir(os.getcwd() + '\static\dummies')
     for d in dummies:
         if not Dummies.exists(name=d.name):
             dummy = Dummies(name=d.name, assets_path=d.path)
             reactions = os.scandir(d.path)
             for r in reactions:
-                dummy.reactions.create(file_name=r.name, reaction_type=ReactionTypes[int(r.name[0])])
+                react = dummy.reactions.create(file_name=r.name, reaction_type=ReactionTypes[int(r.name[0])])
+                img = Image.open(react.dummy.assets_path + '\\' + react.file_name)
+                img.thumbnail(size)
+                img.save(react.dummy.assets_path + '\\' + react.file_name)
+                img.close()
+    return 'Done', 200;
 
 
 @app.route('/admin/resize')

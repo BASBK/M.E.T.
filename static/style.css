@@ -86,7 +86,7 @@
     font-family: 'trebuchet MS', 'lucida sans';
 }
 
-#new_session_form input[type=submit] {
+#new_session_form input[type=submit], input[type=button] {
     background-color: #44aada;
     color: white;
     margin: 8px 0;
