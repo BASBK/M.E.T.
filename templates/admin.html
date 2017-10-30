@@ -20,9 +20,9 @@
                     Имя сессии:<br>
                     <input type="text" name="sess_name" required><br>
                     Кол-во тестовых "комнат":<br>
-                    <input type="text" name="sess_chamber_count" maxlength="2" size="4" required><br>
+                    <input type="text" name="sess_chamber_count" maxlength="2" size="4" required> <span id="max-count-tip"> max = {{ max_chambers }} </span><br>
                     Задержка при смене изображения(мс):<br>
-                    <input type="text" name="sess_swap_delay" maxlength="3" size="3" required><br>
+                    <input type="text" name="sess_swap_delay" maxlength="4" size="4" required><br>
                     Интервал случайного срабатывания подмены(сек): от <input type="text" name="sess_swap_start" maxlength="2" size="3" required> до
                     <input type="text" name="sess_swap_end" maxlength="2" size="3" required><br>
                     <input type="submit", value="Создать сессию">

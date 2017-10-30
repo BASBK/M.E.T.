@@ -1,6 +1,6 @@
 from flask import Flask, render_template, session, request, redirect, url_for, jsonify
 from models import *
-from pony.orm import db_session, desc, commit
+from pony.orm import db_session, desc, commit, count
 from pony.orm.core import TransactionIntegrityError, IntegrityError
 import os, random
 from PIL import Image
@@ -86,15 +86,19 @@ def next_data():
 @app.route('/admin', methods=['GET', 'POST'])
 @db_session
 def admin():
+    max_count = count(Dummies.select()) * 6
     if request.method == "POST":
+        chamber_count = int(request.form['sess_chamber_count'])
+        if chamber_count > max_count:
+            chamber_count = max_count
         ts = TrainingSessions(name=request.form['sess_name'],
-                         chamber_count=request.form['sess_chamber_count'],
+                         chamber_count=chamber_count,
                          swap_delay=request.form['sess_swap_delay'],
                          swap_start=request.form['sess_swap_start'],
                          swap_end=request.form['sess_swap_end'])
         gen_chambers(ts)
     return render_template('admin.html', 
-                           sessions=TrainingSessions.select().order_by(desc(TrainingSessions.id)))
+                           sessions=TrainingSessions.select().order_by(desc(TrainingSessions.id)), max_chambers=max_count)
 
 
 def gen_chambers(ts):
@@ -108,6 +112,7 @@ def gen_chambers(ts):
             t+=1
         else:
             chamber.delete()
+        print(t)
 
 
 @app.route('/session/<id>')
