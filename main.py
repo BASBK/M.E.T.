@@ -112,7 +112,6 @@ def gen_chambers(ts):
             t+=1
         else:
             chamber.delete()
-        print(t)
 
 
 @app.route('/session/<id>')
@@ -135,7 +134,7 @@ def finish():
         cur_session = TrainingSessions.select().order_by(desc(TrainingSessions.id)).first()
         score = calculate_score(user, cur_session)
         return render_template('finish.html')
-    return 'Session not found', 404
+    return redirect(url_for('main'))
 
 
 def calculate_score(user, cur_session):
