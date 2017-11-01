@@ -32,7 +32,8 @@
         </div>
         <script>
             function load_imgs() {
-                $.ajax({ url: "/admin/load_imgs", success: function() {
+                $.ajax({ url: "/admin/load_imgs", success: function(data) {
+                        $('#max-count-tip').text('max = ' + data);
                         alert('Синхронизировано...или нет...');
                     }
                 });

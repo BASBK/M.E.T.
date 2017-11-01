@@ -1,7 +1,6 @@
 from flask import Flask, render_template, session, request, redirect, url_for, jsonify
 from models import *
 from pony.orm import db_session, desc, commit, count
-from pony.orm.core import TransactionIntegrityError, IntegrityError
 import os, random
 from PIL import Image
 
@@ -20,8 +19,6 @@ def main():
     return render_template('login.html')
 
 
-
-@app.route('/init')
 @db_session
 def init():
     ReactionTypes(id=0, type_name='Нейтральный')
@@ -39,7 +36,9 @@ def init():
 @db_session
 def test():
     if 'user' in session:
-        return render_template('test.html', reactions=ReactionTypes.select(lambda r: r.id > 0))
+        if TrainingSessions.select()[:] != []:
+            return render_template('test.html', reactions=ReactionTypes.select(lambda r: r.id > 0))
+        return 'Create training session first!', 404
     return redirect(url_for('main'))
 
 
@@ -152,32 +151,34 @@ def calculate_score(user, cur_session):
 @db_session
 def load_new_dummies():
     size = 900, 600
+    img_formats = ['jpg', 'jpeg', 'png', 'gif', 'bmp']
     dummies = os.scandir(os.getcwd() + '\static\dummies')
     for d in dummies:
         if not Dummies.exists(name=d.name):
             dummy = Dummies(name=d.name, assets_path=d.path)
+            print('New face added: ' + d.name)
             reactions = os.scandir(d.path)
             for r in reactions:
-                react = dummy.reactions.create(file_name=r.name, reaction_type=ReactionTypes[int(r.name[0])])
-                img = Image.open(react.dummy.assets_path + '\\' + react.file_name)
-                img.thumbnail(size)
-                img.save(react.dummy.assets_path + '\\' + react.file_name)
-                img.close()
-    return 'Done', 200;
-
-
-@app.route('/admin/resize')
-@db_session
-def resize_imgs():
-    size = 900, 600
-    for r in Reactions.select():
-        img = Image.open(r.dummy.assets_path + '\\' + r.file_name)
-        img.thumbnail(size)
-        img.save(r.dummy.assets_path + '\\' + r.file_name)
-        img.close()
-    return 'Done....or not'
+                if r.name.lower().split('.')[-1] in img_formats:
+                    react = dummy.reactions.create(file_name=r.name, reaction_type=ReactionTypes[int(r.name[0])])
+                    img = Image.open(react.dummy.assets_path + '\\' + react.file_name)
+                    img.thumbnail(size)
+                    img.save(react.dummy.assets_path + '\\' + react.file_name)
+                    img.close()
+                    print('\tReaction image ' + react.file_name + ' was compressed and added.')
+                else:
+                    print('\t' + r.name + ' is not an image. Ignored.')
+    max_count = count(Dummies.select()) * 6
+    return str(max_count);
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    try:
+        init()
+        print('Initiation complete!\nFace loading complete!')
+    except:
+        print('Initiated already!')
+        load_new_dummies()
+        print('Face loading complete!')
+    app.run(host="0.0.0.0", debug=False)
     
