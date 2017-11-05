@@ -17,7 +17,7 @@
                     </div>
                 </div><br><br>
                 {% endfor %}
-                <input type="button" onclick="next()" value="Далее">
+                <input id="next_btn" type="button" onclick="next()" value="Далее">
             </div>
         </div>
     </body>
@@ -80,12 +80,14 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
         async function swap(img1, img2){
+            $("#next_btn").prop("disabled", true);
             $("#img").delay(300).animate({ opacity: 1 }, 300);
             $("#img").css("backgroundImage", "url(" + img1 + ")");
             await sleep((Math.random() * (start_time - end_time) + end_time) * 1000);
             $("#img").css("backgroundImage", "url(" + img2 + ")");
             await sleep(delay);
             $("#img").css("backgroundImage", "url(" + img1 + ")");
+            $("#next_btn").prop("disabled", false);
         }
         first_data();
     </script>
